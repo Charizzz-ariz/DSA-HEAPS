@@ -1,0 +1,188 @@
+Title: Plants vs. Zombies: The Heap Battle
+
+Theme:
+Zombies are attacking your garden! Each zombie has a threat level, and your job is to defend the garden by organizing the plants using a Max-Heap to prioritize their firepower. 
+Protect your garden by managing plant defenses effectively.
+
+
+Learning Goals:
+
+1. Understand Max-Heaps and their operations (insertion, deletion, and heapify).
+
+2. Learn to visualize and manage heaps in a game-like scenario.
+
+3. Strengthen problem-solving by simulating zombie waves with varying threat levels.
+
+Instructions:
+
+Step 1: Insert Plants to the Heap
+
+• Add plants with specific firepower to a Max-Heap. 
+
+After each insertion, display the current state of the heap.
+
+Step 2: Assign Plants to Fight Zombies
+
+Delete the plant with the highest firepower to defend against the strongest zombie.
+
+After each deletion, display the state of the heap.
+
+Step 3: Heapify Random Plants
+
+Simulate a random wave of plants with varying firepower and build a Max-Heap from it. ↓
+
+#include <iostream>
+#include <vector>
+#include <string>
+#include <algorithm>
+
+using namespace std;
+
+// Class for Max-Heap operations for Plants vs. Zombies game
+class MaxHeap {
+private:
+    // Vector to store heap elements, each represented as a pair of plant name and firepower
+    vector<pair<string, int>> heap;
+
+    // Function to maintain Max-Heap property after inserting a new plant
+    void heapifyUp(int index) {
+        int parentIndex = (index - 1) / 2; // Find parent index
+        // While the current node's firepower is greater than its parent's, swap them
+        if (index > 0 && heap[index].second > heap[parentIndex].second) {
+            swap(heap[index], heap[parentIndex]);
+            heapifyUp(parentIndex); // Recursively call for the parent
+        }
+    }
+
+    // Function to maintain Max-Heap property after removing the root
+    void heapifyDown(int index) {
+        int largest = index; // Assume the current node is the largest
+        int leftChild = 2 * index + 1; // Calculate left child index
+        int rightChild = 2 * index + 2; // Calculate right child index
+
+        // Check if the left child exists and is larger than the current node
+        if (leftChild < heap.size() && heap[leftChild].second > heap[largest].second)
+            largest = leftChild;
+
+        // Check if the right child exists and is larger than the current largest
+        if (rightChild < heap.size() && heap[rightChild].second > heap[largest].second)
+            largest = rightChild;
+
+        // If the largest is not the current node, swap and continue heapifying
+        if (largest != index) {
+            swap(heap[index], heap[largest]);
+            heapifyDown(largest); // Recursively call for the affected child
+        }
+    }
+
+public:
+    // Function to add a plant with its firepower to the Max-Heap
+    void insert(const string& plant, int firepower) {
+        heap.push_back({plant, firepower}); // Add plant to the end of the heap
+        heapifyUp(heap.size() - 1); // Restore Max-Heap property
+        cout << "Added plant: " << plant << " with firepower " << firepower << "!\n";
+        displayHeap(); // Show the updated heap
+    }
+
+    // Function to remove the strongest plant (root of the Max-Heap)
+    void deleteRoot() {
+        if (heap.empty()) { // If heap is empty, show a message
+            cout << "No plants left to fight the zombies!\n";
+            return;
+        }
+        // Show the removed plant and its firepower
+        cout << "Plant " << heap[0].first << " with firepower " << heap[0].second << " defends against the zombies!\n";
+        heap[0] = heap.back(); // Replace root with the last plant
+        heap.pop_back(); // Remove the last plant
+        if (!heap.empty()) // If the heap is not empty, restore Max-Heap property
+            heapifyDown(0);
+        displayHeap(); // Show the updated heap
+    }
+
+    // Function to organize a random list of plants into a Max-Heap
+    void heapify(vector<pair<string, int>>& plants) {
+        heap = plants; // Assign the input list to the heap
+        // Perform heapify operation from the last parent to the root
+        for (int i = (heap.size() / 2) - 1; i >= 0; --i) {
+            heapifyDown(i);
+        }
+        cout << "Random wave of plants organized into Max-Heap!\n";
+        displayHeap(); // Show the organized heap
+    }
+
+    // Function to display the current heap contents
+    void displayHeap() {
+        if (heap.empty()) { // If heap is empty, show a message
+            cout << "No plants in the garden!\n";
+            return;
+        }
+        // Print each plant and its firepower
+        cout << "Current Plant Defenses: ";
+        for (const auto& plant : heap)
+            cout << "(" << plant.first << ", " << plant.second << ") ";
+        cout << endl;
+    }
+};
+
+// Function to display the menu options to the user
+void displayMenu() {
+    cout << "\n--- Plants vs. Zombies: The Heap Battle! ---" << endl;
+    cout << "1. Add a plant (Insert into Max-Heap)" << endl;
+    cout << "2. Remove the strongest plant (Delete root)" << endl;
+    cout << "3. Organize a random wave of plants (Heapify)" << endl;
+    cout << "4. Display current plant defenses" << endl;
+    cout << "5. Exit" << endl;
+    cout << "Choose an option: ";
+}
+
+// Main function to drive the Plants vs. Zombies game
+int main() {
+    MaxHeap garden; // Create an instance of the MaxHeap class
+    int choice; // Variable to store the user's menu choice
+
+    cout << "### Plants vs. Zombies: The Heap Battle! ###\n\n";
+
+    // Loop to repeatedly show the menu until the user chooses to exit
+    do {
+        displayMenu(); // Show the menu
+        cin >> choice; // Get the user's choice
+
+        switch (choice) { // Perform an action based on the choice
+        case 1: { // Add a plant
+            string plant;
+            int firepower;
+            cout << "Enter the plant name: ";
+            cin >> plant;
+            cout << "Enter the plant's firepower: ";
+            cin >> firepower;
+            garden.insert(plant, firepower); // Insert the plant into the heap
+            break;
+        }
+        case 2: // Remove the strongest plant
+            garden.deleteRoot();
+            break;
+        case 3: { // Organize a random wave of plants
+            int n;
+            cout << "Enter the number of plants: ";
+            cin >> n;
+            vector<pair<string, int>> plants(n);
+            cout << "Enter the plant names and their firepower:\n";
+            for (int i = 0; i < n; ++i) {
+                cin >> plants[i].first >> plants[i].second;
+            }
+            garden.heapify(plants); // Heapify the input list
+            break;
+        }
+        case 4: // Display the current heap
+            garden.displayHeap();
+            break;
+        case 5: // Exit the program
+            cout << "Exiting the game. Goodbye!\n";
+            break;
+        default: // Invalid choice
+            cout << "Invalid choice! Please try again.\n";
+        }
+    } while (choice != 5); // Continue until the user chooses to exit
+
+    return 0; // Exit the program
+}
